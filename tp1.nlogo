@@ -1,23 +1,53 @@
+;types of agents
 breed [flies fly]
-breed [steril-flies steril-fly]
+breed [sterile-flies sterile-fly]
 breed [eggs egg]
 
+;agents attributes
 flies-own [energy fertility]
-steril-flies-own [energy]
+sterile-flies-own [energy]
 eggs-own [days-until-hatching flies-to-hatch]
 
 to Setup
   clear-all
-  Setup-patches
+  Setup-Patches
+  Setup-Turtles
+  reset-ticks
 end
 
 to Setup-Patches
-  ask patches [ set pcolor green ]
-  ask n-of(count patches * food-cells / 100) patches [set pcolor brown]
+  ask patches [ set pcolor green ] ;background color
+  ask n-of(count patches * food-cells / 100) patches [set pcolor brown] ;% of initial food patches
+end
+
+to Setup-Turtles
+  create-flies initial-flies
+  [
+    setxy random-xcor random-ycor
+    set heading 0
+    set energy flies-initial-energy
+    set fertility random(101)
+    set color white
+  ]
+
+  create-sterile-flies initial-sterile-flies
+  [
+    setxy random-xcor random-ycor
+    set heading 0
+    set energy sterile-flies-initial-energy
+    set color blue
+  ]
 end
 
 to Go
+  ask turtles
+  [
+    Dead
+  ]
+end
 
+to Dead
+  if energy <= 0 [die]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -116,8 +146,8 @@ SLIDER
 121
 177
 154
-flies-inicial-energy
-flies-inicial-energy
+flies-initial-energy
+flies-initial-energy
 0
 100
 50.0
@@ -129,13 +159,43 @@ HORIZONTAL
 SLIDER
 4
 169
-184
+208
 202
-steril-flies-inicial-energy
-steril-flies-inicial-energy
+sterile-flies-initial-energy
+sterile-flies-initial-energy
 0
 100
-50.0
+49.0
+1
+1
+EN
+HORIZONTAL
+
+SLIDER
+5
+281
+177
+314
+initial-flies
+initial-flies
+0
+50
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+6
+329
+178
+362
+initial-sterile-flies
+initial-sterile-flies
+0
+50
+25.0
 1
 1
 NIL
