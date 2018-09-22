@@ -54,7 +54,7 @@ to Go
 
   ask flies
   [
-    let
+    if any? flie
   ]
 
 end
