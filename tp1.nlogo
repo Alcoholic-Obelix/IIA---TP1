@@ -4,9 +4,10 @@ breed [sterile-flies sterile-fly]
 breed [eggs egg]
 
 ;agents attributes
-flies-own [energy fertility]
-sterile-flies-own [energy]
-eggs-own [days-until-hatching flies-to-hatch]
+turtles-own [energy]
+flies-own [fertility]
+;sterile-flies-own [energy]
+eggs-own [iterations-until-hatching flies-to-hatch]
 
 to Setup
   clear-all
@@ -47,19 +48,99 @@ to Setup-Turtles
 end
 
 to Go
-  ask turtles
-  [
-    Dead
-  ]
 
   ask flies
   [
-    if any? flies-on neighbors4 [
+    ifelse any? flies-on neighbors4
+    [
+      Lay-Eggs
+    ]
+    [
+      ifelse any? neighbors4 with [pcolor = brown]
+      [
+        face one-of neighbors4 with [pcolor = brown]
+        forward 1
+        ask patch-here [set pcolor green]
+        set energy (energy + energy-per-food)
+      ]
+      [
+        ;ifelse one-of neighbors with [(not any? turtles-here)]
+        ;[
+          ;move-to one-of neighbors with [(not any? turtles-here)]
+        ;]
+        ;[
+        ;]
+        moveMosca_aleatorio
+      ]
+    ]
+
+  ]
+
+  ask turtles
+  [
+    set energy energy - 1
+    Dead
+  ]
+  tick
+
+end
+
+to moveMosca_aleatorio
+  rt random 50  ; movimento aleatorio para a mosca andar
+  lt random 50
+  fd 1
+end
+
+to Lay-Eggs
+
+  if any? flies-on patch-ahead 1
+  [
+    hatch-eggs 1
+    [
+      fd 1
+      set iterations-until-hatching iterations-to-hatch
+      set pcolor yellow
+      ;set flies-to-hatch
 
     ]
   ]
+  if any? flies-on patch-left-and-ahead 45 1
+  [
+    hatch-eggs 1
+    [
+      left 45
+      forward 1
+      set iterations-until-hatching iterations-to-hatch
+      ;set flies-to-hatch (([fertility] of myself + [fertility] of flies-on patch-ahead 1) / 20)
+      set pcolor yellow
 
+    ]
+  ]
+  if any? flies-on patch-left-and-ahead 45 1
+  [
+    hatch-eggs 1
+    [
+      left 45
+      forward 1
+      set iterations-until-hatching iterations-to-hatch
+      ;et flies-to-hatch (([fertility] of myself + [fertility] of flies-on patch-ahead 1) / 20)
+      set pcolor yellow
+
+    ]
+  ]
+  if any? flies-on patch-ahead -1
+  [
+    hatch-eggs 1
+    [
+      forward -1
+      set iterations-until-hatching iterations-to-hatch
+      ;set flies-to-hatch (([fertility] of myself + [fertility] of flies-on patch-ahead 1) / 20)
+      set pcolor yellow
+
+    ]
+  ]
 end
+
 
 to Dead
   if energy <= 0 [die]
@@ -195,7 +276,7 @@ initial-flies
 initial-flies
 0
 50
-21.0
+19.0
 1
 1
 NIL
@@ -215,6 +296,32 @@ initial-sterile-flies
 1
 NIL
 HORIZONTAL
+
+SLIDER
+31
+404
+203
+437
+iterations-to-hatch
+iterations-to-hatch
+0
+100
+5.0
+1
+1
+IT
+HORIZONTAL
+
+INPUTBOX
+231
+260
+330
+320
+iterations-to-hatch
+5.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
