@@ -54,7 +54,9 @@ to Go
 
   ask flies
   [
-    let
+    if any? flies-on neighbors4 [
+
+    ]
   ]
 
 end
