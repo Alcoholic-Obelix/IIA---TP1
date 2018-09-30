@@ -6,7 +6,6 @@ breed [eggs egg]
 ;agents attributes
 turtles-own [energy]
 flies-own [fertility]
-;sterile-flies-own [energy]
 eggs-own [iterations-until-hatching flies-to-hatch]
 
 to Setup
@@ -24,10 +23,10 @@ end
 to Setup-Turtles
   create-flies initial-flies ;slider
   [
-    set shape  "butterfly"
+    set shape "butterfly"
     set color white
     ;set label-color white -2
-    ;set size 1.5  ; easier to see
+    set size 1.5  ; easier to see
     setxy random-xcor random-ycor
     set heading 0
     set energy flies-initial-energy ;slider
@@ -36,7 +35,7 @@ to Setup-Turtles
 
   create-sterile-flies initial-sterile-flies ;slider
   [
-    set shape  "butterfly"
+    set shape "butterfly"
     set color blue
     ;set label-color blue - 2
     ;set size 1.5  ; easier to see
@@ -48,47 +47,102 @@ to Setup-Turtles
 end
 
 to Go
-
-  ask flies
-  [
-    ifelse any? flies-on neighbors4
-    [
-      Lay-Eggs
-    ]
-    [
-      ifelse any? neighbors4 with [pcolor = brown]
-      [
-        face one-of neighbors4 with [pcolor = brown]
-        forward 1
-        ask patch-here [set pcolor green]
-        set energy (energy + energy-per-food)
-      ]
-      [
-        ;ifelse one-of neighbors with [(not any? turtles-here)]
-        ;[
-          ;move-to one-of neighbors with [(not any? turtles-here)]
-        ;]
-        ;[
-        ;]
-        moveMosca_aleatorio
-      ]
-    ]
-
-  ]
-
+  Go-Flies
+  Go-Sterile-Flies
+  Go-Eggs
   ask turtles
   [
     set energy energy - 1
     Dead
   ]
-  tick
 
+  if(Endish) [stop]
+  tick
 end
 
-to moveMosca_aleatorio
-  rt random 50  ; movimento aleatorio para a mosca andar
-  lt random 50
-  fd 1
+to Go-Flies
+  ask flies
+  [
+    ifelse any? flies-on neighbors4
+    [
+      Lay-Eggs
+      move-to one-of neighbors4
+    ]
+    [
+      ifelse any? sterile-flies-on neighbors4
+      [
+        set energy energy - (energy / fertility-stolen)
+      ]
+      [
+        ifelse any? neighbors4 with [pcolor = brown]
+        [
+          Eat
+        ]
+        [
+          let empty-patches neighbors
+          ifelse any? empty-patches
+          [
+            let target one-of empty-patches
+            face target
+            move-to target
+          ]
+          [
+            Move-Left-Right
+          ]
+        ]
+      ]
+    ]
+  ]
+end
+
+to Go-Sterile-Flies
+
+  ask sterile-flies
+  [
+    if count sterile-flies-on patch-here > 2
+    [
+      Breed-Fly
+    ]
+
+    ifelse any? sterile-flies-on neighbors
+    [
+      Sterile-Sterile
+    ]
+    [
+      ifelse any? eggs-on neighbors
+      [
+       Sterile-Eggs
+      ]
+      [
+        ifelse any? eggs-on neighbors or any? flies-on neighbors
+        [
+          move-to max-one-of turtles [count turtles]
+        ]
+        [
+          Move-Left-Right
+        ]
+      ]
+    ]
+  ]
+end
+
+to Go-Eggs
+  ask eggs [
+    ifelse iterations-until-hatching = 0
+    [
+      hatch-flies 1
+      [
+        set shape "butterfly"
+        set color white
+        set energy flies-initial-energy
+        set fertility random(101)
+      ]
+      die
+    ]
+    [
+      set iterations-until-hatching iterations-until-hatching - 1
+    ]
+  ]
 end
 
 to Lay-Eggs
@@ -98,10 +152,15 @@ to Lay-Eggs
     hatch-eggs 1
     [
       fd 1
-      set iterations-until-hatching iterations-to-hatch
-      set pcolor yellow
-      ;set flies-to-hatch
+      set shape "dot"
+      set color yellow
 
+      set iterations-until-hatching iterations-to-hatch
+
+      let fertility-one sum [fertility] of flies-on patch-here
+      let fertility-two sum [fertility] of flies-on patch-ahead 1
+      let iterations (fertility-one + fertility-two) / 20
+      set flies-to-hatch int iterations
     ]
   ]
   if any? flies-on patch-left-and-ahead 45 1
@@ -110,10 +169,15 @@ to Lay-Eggs
     [
       left 45
       forward 1
-      set iterations-until-hatching iterations-to-hatch
-      ;set flies-to-hatch (([fertility] of myself + [fertility] of flies-on patch-ahead 1) / 20)
-      set pcolor yellow
+      set shape "dot"
+      set color yellow
 
+      set iterations-until-hatching iterations-to-hatch
+
+      let fertility-one sum [fertility] of flies-on patch-here
+      let fertility-two sum [fertility] of flies-on patch-left-and-ahead 45 1
+      let iterations (fertility-one + fertility-two) / 20
+      set flies-to-hatch int iterations
     ]
   ]
   if any? flies-on patch-left-and-ahead 45 1
@@ -122,10 +186,15 @@ to Lay-Eggs
     [
       left 45
       forward 1
-      set iterations-until-hatching iterations-to-hatch
-      ;et flies-to-hatch (([fertility] of myself + [fertility] of flies-on patch-ahead 1) / 20)
-      set pcolor yellow
+      set shape "dot"
+      set color yellow
 
+      set iterations-until-hatching iterations-to-hatch
+
+      let fertility-one sum [fertility] of flies-on patch-here
+      let fertility-two sum [fertility] of flies-on patch-left-and-ahead 45 1
+      let iterations (fertility-one + fertility-two) / 20
+      set flies-to-hatch int iterations
     ]
   ]
   if any? flies-on patch-ahead -1
@@ -133,17 +202,93 @@ to Lay-Eggs
     hatch-eggs 1
     [
       forward -1
-      set iterations-until-hatching iterations-to-hatch
-      ;set flies-to-hatch (([fertility] of myself + [fertility] of flies-on patch-ahead 1) / 20)
-      set pcolor yellow
+      set shape "dot"
+      set color yellow
 
+      set iterations-until-hatching iterations-to-hatch
+
+      let fertility-one sum [fertility] of flies-on patch-here
+      let fertility-two sum [fertility] of flies-on patch-ahead -1
+      let iterations (fertility-one + fertility-two) / 20
+      set flies-to-hatch int iterations
+    ]
+  ]
+
+end
+
+to Dead
+  if energy <= 0 [die]
+end
+
+to Move-Left-Right
+  let value random 2
+
+    ifelse value = 1
+    [
+      set heading 90
+      fd 1
+    ]
+    [
+      set heading -90
+      fd 1
+    ]
+
+
+end
+
+to Eat
+  face one-of neighbors4 with [pcolor = brown]
+  forward 1
+  ask patch-here [set pcolor green]
+  set energy (energy + energy-per-food)
+end
+
+
+
+to Breed-Fly
+
+  set breed flies
+  ifelse any? flies-on neighbors
+  [
+    ask flies-on patch-here [
+      set energy max([energy] of flies-on neighbors)
+    ]
+  ]
+  [
+    ask flies-on patch-here [
+      set energy (energy + 1)
     ]
   ]
 end
 
+to Sterile-Sterile
+  let sterile-flies-in-neighborhood sterile-flies-on neighbors
 
-to Dead
-  if energy <= 0 [die]
+  if any? sterile-flies-in-neighborhood with [energy < [energy] of myself / 10]
+  [
+    die
+  ]
+
+  move-to one-of neighbors
+end
+
+to Sterile-Eggs
+  ask eggs-on neighbors [
+    if flies-to-hatch > 0
+      [
+        set flies-to-hatch flies-to-hatch - 1
+      ]
+  ]
+end
+
+to-report Endish
+  ;show count turtles
+  if count turtles < 1
+  [
+    user-message "A praga terminou!"
+    report true
+  ]
+  report false
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -182,7 +327,7 @@ food-cells
 food-cells
 5
 20
-5.0
+13.0
 1
 1
 %
@@ -197,7 +342,7 @@ energy-per-food
 energy-per-food
 1
 50
-25.0
+10.0
 1
 1
 EN
@@ -246,7 +391,7 @@ flies-initial-energy
 flies-initial-energy
 0
 100
-50.0
+20.0
 1
 1
 EN
@@ -276,7 +421,7 @@ initial-flies
 initial-flies
 0
 50
-19.0
+10.0
 1
 1
 NIL
@@ -291,22 +436,22 @@ initial-sterile-flies
 initial-sterile-flies
 0
 50
-4.0
+40.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-31
-404
-203
-437
+9
+376
+181
+409
 iterations-to-hatch
 iterations-to-hatch
 0
-100
-5.0
+50
+10.0
 1
 1
 IT
@@ -318,10 +463,36 @@ INPUTBOX
 330
 320
 iterations-to-hatch
-5.0
+10.0
 1
 0
 Number
+
+MONITOR
+986
+97
+1043
+142
+moscas
+count flies
+17
+1
+11
+
+SLIDER
+8
+418
+180
+451
+fertility-stolen
+fertility-stolen
+0
+10
+10.0
+1
+1
+%
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
