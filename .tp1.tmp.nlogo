@@ -379,7 +379,7 @@ BUTTON
 66
 Go
 Go
-NIL
+T
 1
 T
 OBSERVER
@@ -398,7 +398,7 @@ flies-initial-energy
 flies-initial-energy
 0
 100
-20.0
+50.0
 1
 1
 EN
@@ -428,7 +428,7 @@ initial-flies
 initial-flies
 0
 50
-10.0
+50.0
 1
 1
 NIL
@@ -443,7 +443,7 @@ initial-sterile-flies
 initial-sterile-flies
 0
 50
-40.0
+23.0
 1
 1
 NIL
@@ -509,8 +509,8 @@ SLIDER
 age-to-breed
 age-to-breed
 0
-100
-50.0
+50
+32.0
 1
 1
 NIL
