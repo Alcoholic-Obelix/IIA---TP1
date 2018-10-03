@@ -295,6 +295,18 @@ to-report Endish
     user-message "A praga terminou!"
     report true
   ]
+
+  ;to avoid plague of flies and eggs 
+  let total-chao count patches with [pcolor = green]
+  let total-mosquedo count flies 
+  let total-ovos count eggs
+  let total-praga total-mosquedo + total-ovos 
+  
+  if total-praga > total-chao
+    [
+      user-message "A praga esta fora de controlo!!!! :o !"
+      report true
+  ]  
   report false
 end
 @#$#@#$#@
