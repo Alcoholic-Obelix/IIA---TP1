@@ -2,11 +2,13 @@
 breed [flies fly]
 breed [sterile-flies sterile-fly]
 breed [eggs egg]
+breed [spiders spider]
 
 ;agents attributes
-turtles-own [energy]
-flies-own [fertility age]
+flies-own [energy fertility age]
+sterile-flies-own [energy age]
 eggs-own [iterations-until-hatching flies-to-hatch]
+spiders-own [energy]
 
 to Setup
   clear-all
@@ -18,6 +20,11 @@ end
 to Setup-Patches
   ask patches [ set pcolor green ] ;background color
   ask n-of(count patches * food-cells / 100) patches [set pcolor brown] ;% of initial food patches
+
+  if poison-food?
+  [
+    ask n-of((count patches * food-cells / 100) / 3) patches [set pcolor orange] ;half of initial food patches
+  ]
 end
 
 to Setup-Turtles
@@ -43,19 +50,27 @@ to Setup-Turtles
     setxy random-xcor random-ycor
     set heading 0
     set energy sterile-flies-initial-energy ;slider
-    set color blue
   ]
+
+  if spider?
+  [
+    create-spiders 1
+    [
+      set shape "spider"
+      set color black
+      set size 3  ; easier to see
+      setxy random-xcor random-ycor
+      set energy 500 ;slider
+    ]
+  ]
+
 end
 
 to Go
   Go-Flies
   Go-Sterile-Flies
   Go-Eggs
-  ask turtles
-  [
-    set energy energy - 1
-    Dead
-  ]
+  Go-Spider
 
   if(Endish) [stop]
   tick
@@ -64,8 +79,6 @@ end
 to Go-Flies
   ask flies
   [
-    set age age + 1
-
     if age >= age-to-breed
     [
 
@@ -78,10 +91,14 @@ to Go-Flies
     [
       ifelse any? sterile-flies-on neighbors4
       [
+        if fertility-stolen = 0
+        [
+          set fertility-stolen fertility-stolen + 1
+        ]
         set energy energy - (energy / fertility-stolen)
       ]
       [
-        ifelse any? neighbors4 with [pcolor = brown]
+        ifelse any? neighbors4 with [pcolor = brown or pcolor = orange]
         [
           Eat
         ]
@@ -99,6 +116,9 @@ to Go-Flies
         ]
       ]
     ]
+    set age age + 1
+    set energy energy - 1
+    if age > age-to-die or energy <= 0 [die]
   ]
 end
 
@@ -130,6 +150,10 @@ to Go-Sterile-Flies
         ]
       ]
     ]
+
+    set age age + 1
+    set energy energy - 1
+    if age > age-to-die or energy <= 0 [die]
   ]
 end
 
@@ -150,6 +174,52 @@ to Go-Eggs
       set iterations-until-hatching iterations-until-hatching - 1
     ]
   ]
+end
+
+to Go-Spider
+  ask spiders
+  [
+    let victims1 flies in-radius 1
+    let victims2 sterile-flies in-radius 1
+
+    ifelse count victims1 > 0 or count victims2 > 0
+    [
+      set energy energy + (count victims1 * 50) + (count victims2 * 30)
+      ask victims1
+      [
+        die
+      ]
+      ask victims2
+      [
+        die
+      ]
+    ]
+    [
+      set victims1 flies in-radius 3
+      set victims2 sterile-flies in-radius 3
+
+      ifelse count victims1 > 0 or count victims2 > 0
+      [
+        ifelse count victims1 > 0
+        [
+          face one-of victims1
+          fd 1
+        ]
+        [
+          face one-of victims2
+          fd 1
+        ]
+      ]
+      [
+        rt random 361
+        fd 1
+      ]
+    ]
+
+    set energy energy - 10
+    if  energy <= 0 [die]
+  ]
+
 end
 
 to Lay-Eggs
@@ -224,7 +294,7 @@ to Lay-Eggs
 end
 
 to Dead
-  if energy <= 0 [die]
+  if energy <= 0 or age > 200 [die]
 end
 
 to Move-Left-Right
@@ -244,10 +314,18 @@ to Move-Left-Right
 end
 
 to Eat
-  face one-of neighbors4 with [pcolor = brown]
+  face one-of neighbors4 with [pcolor = brown or pcolor = orange]
   forward 1
-  ask patch-here [set pcolor green]
-  set energy (energy + energy-per-food)
+  ifelse pcolor = brown
+  [
+    ask patch-here [set pcolor green]
+    set energy (energy + energy-per-food)
+  ]
+  [
+    ask patch-here [set pcolor green]
+    die
+  ]
+
 end
 
 
@@ -379,7 +457,7 @@ BUTTON
 66
 Go
 Go
-NIL
+T
 1
 T
 OBSERVER
@@ -398,7 +476,7 @@ flies-initial-energy
 flies-initial-energy
 0
 100
-20.0
+60.0
 1
 1
 EN
@@ -428,7 +506,7 @@ initial-flies
 initial-flies
 0
 50
-10.0
+50.0
 1
 1
 NIL
@@ -443,7 +521,7 @@ initial-sterile-flies
 initial-sterile-flies
 0
 50
-40.0
+23.0
 1
 1
 NIL
@@ -463,17 +541,6 @@ iterations-to-hatch
 1
 IT
 HORIZONTAL
-
-INPUTBOX
-231
-260
-330
-320
-iterations-to-hatch
-10.0
-1
-0
-Number
 
 MONITOR
 986
@@ -501,20 +568,49 @@ fertility-stolen
 %
 HORIZONTAL
 
-SLIDER
-24
-526
-196
-559
-age-to-breed
-age-to-breed
+SWITCH
+245
+115
+376
+148
+spider?
+spider?
 0
-100
-50.0
 1
+-1000
+
+SWITCH
+245
+155
+372
+188
+poison-food?
+poison-food?
+0
 1
-NIL
-HORIZONTAL
+-1000
+
+INPUTBOX
+240
+201
+341
+261
+age-to-die
+60.0
+1
+0
+Number
+
+INPUTBOX
+238
+270
+340
+330
+age-to-breed
+70.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -760,6 +856,23 @@ Rectangle -1 true true 65 221 80 296
 Polygon -1 true true 195 285 210 285 210 240 240 210 195 210
 Polygon -7500403 true false 276 85 285 105 302 99 294 83
 Polygon -7500403 true false 219 85 210 105 193 99 201 83
+
+spider
+true
+0
+Polygon -7500403 true true 134 255 104 240 96 210 98 196 114 171 134 150 119 135 119 120 134 105 164 105 179 120 179 135 164 150 185 173 199 195 203 210 194 240 164 255
+Line -7500403 true 167 109 170 90
+Line -7500403 true 170 91 156 88
+Line -7500403 true 130 91 144 88
+Line -7500403 true 133 109 130 90
+Polygon -7500403 true true 167 117 207 102 216 71 227 27 227 72 212 117 167 132
+Polygon -7500403 true true 164 210 158 194 195 195 225 210 195 285 240 210 210 180 164 180
+Polygon -7500403 true true 136 210 142 194 105 195 75 210 105 285 60 210 90 180 136 180
+Polygon -7500403 true true 133 117 93 102 84 71 73 27 73 72 88 117 133 132
+Polygon -7500403 true true 163 140 214 129 234 114 255 74 242 126 216 143 164 152
+Polygon -7500403 true true 161 183 203 167 239 180 268 239 249 171 202 153 163 162
+Polygon -7500403 true true 137 140 86 129 66 114 45 74 58 126 84 143 136 152
+Polygon -7500403 true true 139 183 97 167 61 180 32 239 51 171 98 153 137 162
 
 square
 false
