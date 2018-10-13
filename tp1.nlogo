@@ -54,7 +54,7 @@ to Setup-Turtles
 
   if spider?
   [
-    create-spiders 1
+    create-spiders 2
     [
       set shape "spider"
       set color black
@@ -216,7 +216,7 @@ to Go-Spider
       ]
     ]
 
-    set energy energy - 10
+    set energy energy - 1
     if  energy <= 0 [die]
   ]
 
@@ -374,17 +374,17 @@ to-report Endish
     report true
   ]
 
-  ;to avoid plague of flies and eggs 
+  ;to avoid plague of flies and eggs
   let total-chao count patches with [pcolor = green]
-  let total-mosquedo count flies 
+  let total-mosquedo count flies
   let total-ovos count eggs
-  let total-praga total-mosquedo + total-ovos 
-  
+  let total-praga total-mosquedo + total-ovos
+
   if total-praga > total-chao
     [
       user-message "A praga esta fora de controlo!!!! :o !"
       report true
-  ]  
+  ]
   report false
 end
 @#$#@#$#@
@@ -424,7 +424,7 @@ food-cells
 food-cells
 5
 20
-13.0
+10.0
 1
 1
 %
@@ -439,7 +439,7 @@ energy-per-food
 energy-per-food
 1
 50
-10.0
+25.0
 1
 1
 EN
@@ -487,8 +487,8 @@ SLIDER
 flies-initial-energy
 flies-initial-energy
 0
-100
-60.0
+50
+40.0
 1
 1
 EN
@@ -502,8 +502,8 @@ SLIDER
 sterile-flies-initial-energy
 sterile-flies-initial-energy
 0
-100
-50.0
+50
+25.0
 1
 1
 EN
@@ -518,7 +518,7 @@ initial-flies
 initial-flies
 0
 50
-50.0
+25.0
 1
 1
 NIL
@@ -533,7 +533,7 @@ initial-sterile-flies
 initial-sterile-flies
 0
 50
-23.0
+25.0
 1
 1
 NIL
@@ -574,7 +574,7 @@ fertility-stolen
 fertility-stolen
 0
 10
-10.0
+5.0
 1
 1
 %
@@ -587,7 +587,7 @@ SWITCH
 148
 spider?
 spider?
-0
+1
 1
 -1000
 
@@ -608,7 +608,7 @@ INPUTBOX
 341
 261
 age-to-die
-60.0
+100.0
 1
 0
 Number
@@ -619,7 +619,7 @@ INPUTBOX
 340
 330
 age-to-breed
-70.0
+35.0
 1
 0
 Number
@@ -987,6 +987,266 @@ NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="food-cells" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="food-cells">
+      <value value="5"/>
+      <value value="10"/>
+      <value value="15"/>
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="flies-initial-energy">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fertility-stolen">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-die">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energy-per-food">
+      <value value="20"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="poison-food?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-sterile-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-breed">
+      <value value="45"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="iterations-to-hatch">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sterile-flies-initial-energy">
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="spider?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="sterile-flies" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="food-cells">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="flies-initial-energy">
+      <value value="38"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fertility-stolen">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-die">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energy-per-food">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="poison-food?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-sterile-flies">
+      <value value="0"/>
+      <value value="10"/>
+      <value value="20"/>
+      <value value="30"/>
+      <value value="40"/>
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-breed">
+      <value value="35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="iterations-to-hatch">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sterile-flies-initial-energy">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="spider?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="fertility-stolen" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="food-cells">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="flies-initial-energy">
+      <value value="38"/>
+    </enumeratedValueSet>
+    <steppedValueSet variable="fertility-stolen" first="0" step="1" last="10"/>
+    <enumeratedValueSet variable="age-to-die">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energy-per-food">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="poison-food?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-sterile-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-breed">
+      <value value="35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="iterations-to-hatch">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sterile-flies-initial-energy">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="spider?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="energy-per-food" repetitions="100" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="food-cells">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="flies-initial-energy">
+      <value value="38"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fertility-stolen">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-die">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energy-per-food">
+      <value value="10"/>
+      <value value="20"/>
+      <value value="30"/>
+      <value value="40"/>
+      <value value="50"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="poison-food?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-sterile-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-breed">
+      <value value="35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="iterations-to-hatch">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sterile-flies-initial-energy">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="spider?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="spider" repetitions="500" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="food-cells">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="flies-initial-energy">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fertility-stolen">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-die">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energy-per-food">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="poison-food?">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-sterile-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-breed">
+      <value value="35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="iterations-to-hatch">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sterile-flies-initial-energy">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="spider?">
+      <value value="false"/>
+      <value value="true"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="poison-food" repetitions="500" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="food-cells">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="flies-initial-energy">
+      <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fertility-stolen">
+      <value value="5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-die">
+      <value value="100"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="energy-per-food">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="poison-food?">
+      <value value="false"/>
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="initial-sterile-flies">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="age-to-breed">
+      <value value="35"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="iterations-to-hatch">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="sterile-flies-initial-energy">
+      <value value="25"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="spider?">
+      <value value="false"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
