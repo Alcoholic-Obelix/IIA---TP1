@@ -5,8 +5,8 @@ breed [eggs egg]
 breed [spiders spider]
 
 ;agents attributes
-flies-own [energy fertility age]
-sterile-flies-own [energy age]
+flies-own [energy fertility age perceptions] ;perceptiosn added
+sterile-flies-own [energy age perceptions] ;perceptiosn added
 eggs-own [iterations-until-hatching flies-to-hatch]
 spiders-own [energy]
 
@@ -32,9 +32,7 @@ to Setup-Turtles
   [
     set shape "butterfly"
     set color white
-    ;set label-color white -2
-    set size 1.5  ; easier to see
-    setxy random-xcor random-ycor
+    set size 1.5      setxy random-xcor random-ycor
     set heading 0
     set age 1
     set energy flies-initial-energy ;slider
@@ -45,8 +43,6 @@ to Setup-Turtles
   [
     set shape "butterfly"
     set color blue
-    ;set label-color blue - 2
-    ;set size 1.5  ; easier to see
     setxy random-xcor random-ycor
     set heading 0
     set energy sterile-flies-initial-energy ;slider
@@ -67,8 +63,18 @@ to Setup-Turtles
 end
 
 to Go
-  Go-Flies
-  Go-Sterile-Flies
+  if Movement = "Perception-Normal"
+  [
+    Go-Flies
+    Go-Sterile-Flies
+  ]
+
+  if Movement = "Perception-Change"
+  [
+    Go-Flies-2
+    Go-Sterile-Flies-2
+  ]
+
   Go-Eggs
   Go-Spider
 
@@ -130,7 +136,6 @@ to Go-Sterile-Flies
     [
       Breed-Fly
     ]
-
     ifelse any? sterile-flies-on neighbors
     [
       Sterile-Sterile
@@ -138,7 +143,7 @@ to Go-Sterile-Flies
     [
       ifelse any? eggs-on neighbors
       [
-       Sterile-Eggs
+        Sterile-Eggs
       ]
       [
         ifelse any? eggs-on neighbors or any? flies-on neighbors
@@ -300,15 +305,15 @@ end
 to Move-Left-Right
   let value random 2
 
-    ifelse value = 1
-    [
-      set heading 90
-      fd 1
-    ]
-    [
-      set heading -90
-      fd 1
-    ]
+  ifelse value = 1
+  [
+    set heading 90
+    fd 1
+  ]
+  [
+    set heading -90
+    fd 1
+  ]
 
 
 end
@@ -327,8 +332,6 @@ to Eat
   ]
 
 end
-
-
 
 to Breed-Fly
 
@@ -362,7 +365,7 @@ to Sterile-Eggs
     if flies-to-hatch > 0
       [
         set flies-to-hatch flies-to-hatch - 1
-      ]
+    ]
   ]
 end
 
@@ -370,7 +373,7 @@ to-report Endish
   ;show count turtles
   if count turtles < 1
   [
-    user-message "A praga terminou!"
+    ;user-message "A praga terminou!"
     report true
   ]
 
@@ -381,17 +384,107 @@ to-report Endish
   let total-praga total-mosquedo + total-ovos
 
   if total-praga > total-chao
-    [
-      user-message "A praga esta fora de controlo!!!! :o !"
-      report true
+  [
+    ;user-message "A praga esta fora de controlo!!!! :o !"
+    report true
   ]
   report false
 end
+
+to Go-Flies-2
+  ask flies
+  [
+    ifelse any? flies in-radius 2  and age > age-to-breed
+    [
+      Lay-Eggs
+      move-to one-of neighbors4 in-radius 2
+    ]
+    [
+      ifelse any? sterile-flies in-radius 2
+      [
+        if fertility-stolen = 0
+        [
+          set fertility-stolen fertility-stolen + 1
+        ]
+        set energy energy - (energy / fertility-stolen)
+      ]
+      [
+        ifelse any? patches with [pcolor = brown or pcolor = orange] in-radius 2
+        [
+          Eat-2
+        ]
+        [
+          let empty-patches neighbors4 in-radius 2
+          ifelse any? empty-patches
+          [
+            let target one-of empty-patches
+            face target
+            move-to target
+          ]
+          [
+            Move-Left-Right
+          ]
+        ]
+      ]
+    ]
+    set age age + 1
+    set energy energy - 1
+    if age > age-to-die or energy <= 0 [die]
+  ]
+end
+
+to Go-Sterile-Flies-2
+  ask sterile-flies
+  [
+    if count sterile-flies-on patch-here > 2
+    [
+      Breed-Fly
+    ]
+
+    ifelse any? sterile-flies-on neighbors in-radius 2
+    [
+      Sterile-Sterile
+    ]
+    [
+      ifelse any? eggs-on neighbors in-radius 2
+      [
+        Sterile-Eggs
+      ]
+      [
+        ifelse any? eggs in-radius 2 or any? flies-on neighbors in-radius 2
+        [
+          move-to max-one-of turtles [count turtles]
+        ]
+        [
+          Move-Left-Right
+        ]
+      ]
+    ]
+
+    set age age + 1
+    set energy energy - 1
+    if age > age-to-die or energy <= 0 [die]
+  ]
+end
+
+to Eat-2
+  face one-of patches in-radius 2 with [pcolor = brown or pcolor = orange]
+  forward 2
+  ifelse pcolor = brown
+  [
+    ask patch-here [set pcolor green]
+    set energy (energy + energy-per-food)
+  ]
+  [
+    ask patch-here [set pcolor green]
+    die
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-378
+198
 10
-919
+739
 552
 -1
 -1
@@ -416,40 +509,40 @@ ticks
 30.0
 
 SLIDER
-6
-21
-178
-54
+11
+93
+183
+126
 food-cells
 food-cells
 5
 20
-10.0
+20.0
 1
 1
 %
 HORIZONTAL
 
 SLIDER
-7
-67
-179
-100
+12
+140
+184
+173
 energy-per-food
 energy-per-food
 1
 50
-25.0
+50.0
 1
 1
 EN
 HORIZONTAL
 
 BUTTON
-203
-33
-267
-66
+22
+461
+86
+494
 Setup
 Setup
 NIL
@@ -463,10 +556,10 @@ NIL
 1
 
 BUTTON
-291
-33
-354
-66
+110
+461
+173
+494
 Go
 Go
 T
@@ -480,10 +573,10 @@ NIL
 1
 
 SLIDER
-5
-121
-177
-154
+11
+220
+183
+253
 flies-initial-energy
 flies-initial-energy
 0
@@ -495,40 +588,40 @@ EN
 HORIZONTAL
 
 SLIDER
-4
-169
-208
-202
+10
+269
+184
+302
 sterile-flies-initial-energy
 sterile-flies-initial-energy
 0
 50
-25.0
+30.0
 1
 1
 EN
 HORIZONTAL
 
 SLIDER
-5
-281
-177
-314
+11
+345
+183
+378
 initial-flies
 initial-flies
 0
 50
-25.0
+50.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-6
-329
-178
-362
+11
+392
+183
+425
 initial-sterile-flies
 initial-sterile-flies
 0
@@ -540,10 +633,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-376
-181
-409
+780
+191
+952
+224
 iterations-to-hatch
 iterations-to-hatch
 0
@@ -555,21 +648,21 @@ IT
 HORIZONTAL
 
 MONITOR
-986
-97
-1043
-142
-moscas
+842
+425
+899
+470
+Flies
 count flies
 17
 1
 11
 
 SLIDER
-8
-418
-180
-451
+780
+149
+952
+182
 fertility-stolen
 fertility-stolen
 0
@@ -581,10 +674,10 @@ fertility-stolen
 HORIZONTAL
 
 SWITCH
-245
-115
-376
-148
+751
+286
+861
+319
 spider?
 spider?
 1
@@ -592,21 +685,21 @@ spider?
 -1000
 
 SWITCH
-245
-155
-372
-188
+872
+286
+986
+319
 poison-food?
 poison-food?
-0
+1
 1
 -1000
 
 INPUTBOX
-240
-201
-341
-261
+793
+330
+866
+390
 age-to-die
 100.0
 1
@@ -614,15 +707,75 @@ age-to-die
 Number
 
 INPUTBOX
-238
-270
-340
+873
 330
+947
+390
 age-to-breed
-35.0
+30.0
 1
 0
 Number
+
+CHOOSER
+780
+230
+953
+275
+Movement
+Movement
+"Perception-Normal" "Perception-Change"
+0
+
+TEXTBOX
+78
+73
+228
+91
+FOOD
+11
+125.0
+1
+
+TEXTBOX
+73
+199
+223
+217
+ENERGY
+11
+124.0
+1
+
+TEXTBOX
+66
+323
+182
+341
+QUANTITY
+11
+124.0
+1
+
+TEXTBOX
+844
+123
+994
+141
+EXTRAS
+11
+114.0
+1
+
+TEXTBOX
+849
+407
+986
+425
+COUNTER
+11
+104.0
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
@@ -1204,15 +1357,18 @@ NetLogo 6.0.4
       <value value="true"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="poison-food" repetitions="500" runMetricsEveryStep="false">
+  <experiment name="age-to-breed" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <metric>count turtles</metric>
     <enumeratedValueSet variable="food-cells">
-      <value value="10"/>
+      <value value="15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="flies-initial-energy">
       <value value="40"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Movement">
+      <value value="&quot;Perception-Normal&quot;"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="fertility-stolen">
       <value value="5"/>
@@ -1221,26 +1377,30 @@ NetLogo 6.0.4
       <value value="100"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="energy-per-food">
-      <value value="25"/>
+      <value value="40"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="initial-flies">
       <value value="25"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="poison-food?">
       <value value="false"/>
-      <value value="true"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="initial-sterile-flies">
       <value value="25"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="age-to-breed">
       <value value="35"/>
+      <value value="36"/>
+      <value value="37"/>
+      <value value="38"/>
+      <value value="39"/>
+      <value value="40"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="iterations-to-hatch">
       <value value="10"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="sterile-flies-initial-energy">
-      <value value="25"/>
+      <value value="30"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="spider?">
       <value value="false"/>
